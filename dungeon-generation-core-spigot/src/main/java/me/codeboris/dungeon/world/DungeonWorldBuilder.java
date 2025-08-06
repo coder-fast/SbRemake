@@ -281,7 +281,7 @@ public class DungeonWorldBuilder {
                 return Material.STONE;
             case NORMAL:
             default:
-                return Material.STONE_BRICKS;
+                return Material.SMOOTH_BRICK;
         }
     }
     

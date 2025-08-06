@@ -344,7 +344,7 @@ public class SchematicLoader {
         } catch (IllegalArgumentException e) {
             // Fallback mappings for common blocks
             switch (blockState) {
-                case "STONE_BRICKS": return Material.STONE;
+                case "STONE_BRICKS": return Material.SMOOTH_BRICK;
                 case "COBBLESTONE": return Material.STONE;
                 case "PLANKS": return Material.WOOD;
                 case "LOG": return Material.LOG;
@@ -354,10 +354,10 @@ public class SchematicLoader {
                 case "CARPET": return Material.CARPET;
                 case "BED": return Material.BED;
                 case "SIGN": return Material.SIGN;
-                case "DOOR": return Material.DOOR;
+                case "DOOR": return Material.WOOD_DOOR;
                 case "FENCE": return Material.FENCE;
                 case "FENCE_GATE": return Material.FENCE_GATE;
-                case "STAIRS": return Material.STAIRS;
+                case "STAIRS": return Material.WOOD_STAIRS;
                 case "SLAB": return Material.STEP;
                 case "WALL": return Material.COBBLE_WALL;
                 default: return Material.STONE;
@@ -455,12 +455,12 @@ public class SchematicLoader {
         for (int x = 0; x < 32; x++) {
             for (int z = 0; z < 32; z++) {
                 // Floor
-                blocks.add(new SchematicBlock(Material.STONE_SLAB, (byte) 0, x, 0, z));
+                blocks.add(new SchematicBlock(Material.STEP, (byte) 0, x, 0, z));
                 
                 // Walls
                 if (x == 0 || x == 31 || z == 0 || z == 31) {
                     for (int y = 1; y <= 4; y++) {
-                        blocks.add(new SchematicBlock(Material.STONE_BRICKS, (byte) 0, x, y, z));
+                        blocks.add(new SchematicBlock(Material.SMOOTH_BRICK, (byte) 0, x, y, z));
                     }
                 }
             }
