@@ -1,6 +1,6 @@
-package me.carscupcake.dungeon.room;
+package me.codeboris.dungeon.room;
 
-import me.carscupcake.dungeon.util.Pos2d;
+import me.codeboris.dungeon.util.Pos2d;
 import org.bukkit.Location;
 
 /**

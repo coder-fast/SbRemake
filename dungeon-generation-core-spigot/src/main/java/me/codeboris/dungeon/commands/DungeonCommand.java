@@ -1,11 +1,11 @@
-package me.carscupcake.dungeon.commands;
+package me.codeboris.dungeon.commands;
 
-import me.carscupcake.dungeon.DungeonGenerationCore;
-import me.carscupcake.dungeon.generator.DungeonGenerator;
-import me.carscupcake.dungeon.room.DoorType;
-import me.carscupcake.dungeon.room.Room;
-import me.carscupcake.dungeon.room.RoomType;
-import me.carscupcake.dungeon.util.Pos2d;
+import me.codeboris.dungeon.DungeonGenerationCore;
+import me.codeboris.dungeon.generator.DungeonGenerator;
+import me.codeboris.dungeon.room.DoorType;
+import me.codeboris.dungeon.room.Room;
+import me.codeboris.dungeon.room.RoomType;
+import me.codeboris.dungeon.util.Pos2d;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
