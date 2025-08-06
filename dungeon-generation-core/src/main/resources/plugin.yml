@@ -1,0 +1,6 @@
+name: DungeonGenerationCore
+main: me.carscupcake.dungeongen.DungeonGenerationCore
+version: 1.0
+api-version: 1.8.8
+author: carscupcake
+description: Core library for Hypixel-style dungeon generation.
