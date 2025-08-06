@@ -1,0 +1,17 @@
+name: DungeonGenerationCore
+version: 1.0.0
+description: Hypixel-style dungeon generation core for Minecraft 1.8.8
+author: CarsCupcake
+main: me.carscupcake.dungeon.DungeonGenerationCore
+api-version: 1.8
+
+commands:
+  dungeon:
+    description: Dungeon generation commands
+    usage: /dungeon <generate|test|build|reload>
+    aliases: [dg]
+
+permissions:
+  dungeon.admin:
+    description: Access to dungeon generation commands
+    default: op
