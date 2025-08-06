@@ -14,16 +14,14 @@ A Hypixel Skyblock Catacombs-style dungeon generation plugin for Minecraft 1.8.8
 - **Bridge Connections** - Internal doors for multi-block rooms
 - **Critical Path Marking** - Wither and Fairy doors mark the essential route
 - **Deterministic Generation** - Same seed produces identical dungeons
-
-### 🔄 In Progress
-- World generation integration
-- Schematic system for room templates
-- Block placement and structure building
+- **Schematic System** - Load room templates from external files (JSON, .schematic, .gz)
+- **World Generation** - Convert room data to actual blocks in the world
+- **Automatic Folder Structure** - Creates organized folders for different room types
 
 ### 📋 Planned
-- Custom schematic format support
-- Entity spawning system
-- Loot generation
+- WorldEdit .schematic format support (NBT reading)
+- Advanced schematic features (entity support, chest contents)
+- Performance optimization for large dungeons
 - Integration with existing dungeon plugins
 
 ## Algorithm Overview
@@ -60,7 +58,9 @@ The algorithm marks these paths with special door types (Wither/Fairy doors) to 
 ## Commands
 
 - `/dungeon test` - Generate and display ASCII representation of dungeon layout
-- `/dungeon generate [seed]` - Generate dungeon with optional seed
+- `/dungeon generate [seed]` - Generate dungeon algorithm with optional seed
+- `/dungeon build [seed]` - Build actual dungeon in world at your location
+- `/dungeon reload` - Reload schematic files from disk
 - `/dg` - Alias for `/dungeon`
 
 ## Permissions
@@ -70,9 +70,56 @@ The algorithm marks these paths with special door types (Wither/Fairy doors) to 
 ## Installation
 
 1. Download the latest release JAR file
-2. Place in your server's `plugins` folder
+2. Place in your server's `plugins` folder  
 3. Restart the server
 4. Use `/dungeon test` to verify installation
+5. Place your schematic files in `/plugins/DungeonGenerationCore/rooms/`
+
+### Folder Structure
+The plugin automatically creates this structure:
+```
+plugins/DungeonGenerationCore/rooms/
+├── 1x1/          # 1x1 room schematics
+├── 1x2/          # 1x2 room schematics  
+├── 1x3/          # 1x3 room schematics
+├── 1x4/          # 1x4 room schematics
+├── L-shape/      # L-shaped room schematics
+├── 2x2/          # 2x2 room schematics
+├── entrance/     # Entrance (green) room schematics
+├── blood/        # Blood (boss) room schematics
+├── fairy/        # Fairy room schematics
+├── trap/         # Trap room schematics
+└── puzzle/       # Puzzle room schematics
+```
+
+### Schematic Formats
+Supported schematic file formats:
+
+#### JSON Format (Recommended)
+```json
+{
+  "name": "my-room",
+  "originRotation": "northwest",
+  "width": 32,
+  "height": 16, 
+  "length": 32,
+  "blocks": [
+    // 3D array: blocks[x][y][z] = blockId
+    // Use 1.8.8 block IDs (Stone=1, Stone Bricks=98, Air=0)
+  ]
+}
+```
+
+#### Supported Files
+- **`.json`** - JSON format (like your original implementation)
+- **`.json.gz`** - Gzipped JSON for smaller file sizes
+- **`.schematic`** - WorldEdit format (basic support)
+
+#### Block Coordinates
+- Each room is **32×32 blocks** (configurable height up to 32)
+- Doors should be at room edges: center positions (15-16 on each side)
+- Use air blocks (ID: 0) for door openings
+- The plugin handles rotation automatically
 
 ## Building from Source
 

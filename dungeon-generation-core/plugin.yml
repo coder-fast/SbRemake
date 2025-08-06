@@ -8,7 +8,7 @@ api-version: 1.8
 commands:
   dungeon:
     description: Dungeon generation commands
-    usage: /dungeon <generate|test>
+    usage: /dungeon <generate|test|build|reload>
     aliases: [dg]
 
 permissions:

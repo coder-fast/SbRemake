@@ -1,5 +1,6 @@
 package me.carscupcake.dungeon.commands;
 
+import me.carscupcake.dungeon.DungeonGenerationCore;
 import me.carscupcake.dungeon.generator.DungeonGenerator;
 import me.carscupcake.dungeon.room.DoorType;
 import me.carscupcake.dungeon.room.Room;
@@ -31,7 +32,11 @@ public class DungeonCommand implements CommandExecutor {
         }
         
         if (args.length == 0) {
-            player.sendMessage(ChatColor.YELLOW + "Usage: /dungeon <generate|test>");
+            player.sendMessage(ChatColor.YELLOW + "Usage: /dungeon <generate|test|build|reload>");
+            player.sendMessage(ChatColor.GRAY + "  generate [seed] - Generate dungeon algorithm");
+            player.sendMessage(ChatColor.GRAY + "  test - Display ASCII dungeon map");
+            player.sendMessage(ChatColor.GRAY + "  build [seed] - Build actual dungeon in world");
+            player.sendMessage(ChatColor.GRAY + "  reload - Reload schematic files");
             return true;
         }
         
@@ -42,8 +47,14 @@ public class DungeonCommand implements CommandExecutor {
             case "test":
                 testDungeon(player);
                 break;
+            case "build":
+                buildDungeon(player, args);
+                break;
+            case "reload":
+                reloadSchematics(player);
+                break;
             default:
-                player.sendMessage(ChatColor.RED + "Unknown subcommand! Use: generate or test");
+                player.sendMessage(ChatColor.RED + "Unknown subcommand! Use: generate, test, build, or reload");
                 break;
         }
         
@@ -186,6 +197,60 @@ public class DungeonCommand implements CommandExecutor {
                 return ChatColor.DARK_GRAY + symbol + ChatColor.RESET;
             default:
                 return symbol;
+        }
+    }
+    
+    /**
+     * Build an actual dungeon in the world
+     */
+    private void buildDungeon(Player player, String[] args) {
+        player.sendMessage(ChatColor.GREEN + "Building dungeon in world...");
+        
+        long seed = System.currentTimeMillis();
+        if (args.length > 1) {
+            try {
+                seed = Long.parseLong(args[1]);
+            } catch (NumberFormatException e) {
+                player.sendMessage(ChatColor.YELLOW + "Invalid seed, using random seed: " + seed);
+            }
+        }
+        
+        // Create 6x6 dungeon grid
+        Room[][] rooms = new Room[6][6];
+        DungeonGenerator generator = new DungeonGenerator(rooms, seed);
+        
+        // Generate door connections starting from fairy room
+        generator.generateDoors(new Pos2d(generator.getFairy().getPosition().getX(), 
+                                        generator.getFairy().getPosition().getZ()));
+        
+        // Build in world
+        DungeonGenerationCore plugin = DungeonGenerationCore.getInstance();
+        plugin.getWorldBuilder().buildDungeon(generator, player.getWorld(), player.getLocation());
+        
+        player.sendMessage(ChatColor.GREEN + "Dungeon construction started with seed: " + seed);
+        player.sendMessage(ChatColor.YELLOW + "Check console for build progress...");
+        player.sendMessage(ChatColor.AQUA + "Entrance: " + generator.getEntrance().getPosition());
+        player.sendMessage(ChatColor.LIGHT_PURPLE + "Fairy: " + generator.getFairy().getPosition());
+        player.sendMessage(ChatColor.RED + "Blood: " + generator.getBlood().getPosition());
+        player.sendMessage(ChatColor.WHITE + "Trap: " + generator.getTrap().getPosition());
+    }
+    
+    /**
+     * Reload schematic files
+     */
+    private void reloadSchematics(Player player) {
+        player.sendMessage(ChatColor.YELLOW + "Reloading schematic files...");
+        
+        DungeonGenerationCore plugin = DungeonGenerationCore.getInstance();
+        plugin.getSchematicLoader().loadAllSchematics();
+        
+        player.sendMessage(ChatColor.GREEN + "Schematics reloaded successfully!");
+        player.sendMessage(ChatColor.GRAY + "Available categories: " + plugin.getSchematicLoader().getAvailableCategories());
+        
+        // Show schematic counts
+        for (String category : plugin.getSchematicLoader().getAvailableCategories()) {
+            int count = plugin.getSchematicLoader().getSchematicCount(category);
+            player.sendMessage(ChatColor.GRAY + "  " + category + ": " + count + " schematics");
         }
     }
 }

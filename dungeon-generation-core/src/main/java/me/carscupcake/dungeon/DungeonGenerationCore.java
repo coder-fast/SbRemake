@@ -1,6 +1,8 @@
 package me.carscupcake.dungeon;
 
 import me.carscupcake.dungeon.commands.DungeonCommand;
+import me.carscupcake.dungeon.schematic.SchematicLoader;
+import me.carscupcake.dungeon.world.DungeonWorldBuilder;
 import org.bukkit.plugin.java.JavaPlugin;
 
 /**
@@ -10,6 +12,8 @@ import org.bukkit.plugin.java.JavaPlugin;
 public class DungeonGenerationCore extends JavaPlugin {
     
     private static DungeonGenerationCore instance;
+    private SchematicLoader schematicLoader;
+    private DungeonWorldBuilder worldBuilder;
     
     @Override
     public void onEnable() {
@@ -18,10 +22,19 @@ public class DungeonGenerationCore extends JavaPlugin {
         getLogger().info("=== Dungeon Generation Core ===");
         getLogger().info("Loading Hypixel-style dungeon generation...");
         
+        // Initialize schematic system
+        getLogger().info("Initializing schematic loader...");
+        schematicLoader = new SchematicLoader(this);
+        
+        // Initialize world builder
+        getLogger().info("Initializing world builder...");
+        worldBuilder = new DungeonWorldBuilder(this, schematicLoader);
+        
         // Register commands
         getCommand("dungeon").setExecutor(new DungeonCommand());
         
         getLogger().info("Dungeon Generation Core enabled successfully!");
+        getLogger().info("Available schematic categories: " + schematicLoader.getAvailableCategories());
     }
     
     @Override
@@ -31,5 +44,13 @@ public class DungeonGenerationCore extends JavaPlugin {
     
     public static DungeonGenerationCore getInstance() {
         return instance;
+    }
+    
+    public SchematicLoader getSchematicLoader() {
+        return schematicLoader;
+    }
+    
+    public DungeonWorldBuilder getWorldBuilder() {
+        return worldBuilder;
     }
 }
