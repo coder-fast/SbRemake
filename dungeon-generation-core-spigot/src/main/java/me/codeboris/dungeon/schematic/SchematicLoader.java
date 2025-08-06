@@ -14,6 +14,7 @@ import org.bukkit.Material;
 import java.io.*;
 import java.util.*;
 import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 /**
  * Loads schematics from the plugin folder structure
@@ -68,19 +69,67 @@ public class SchematicLoader {
      * Create example schematic files for reference
      */
     private void createExampleSchematic(File folder, String type) {
-        File exampleFile = new File(folder, "example-" + type + ".json");
+        File exampleFile = new File(folder, "example-" + type + ".json.gz");
         if (!exampleFile.exists()) {
             try {
-                PrintWriter writer = new PrintWriter(new FileWriter(exampleFile));
-                writer.println("// Example schematic for " + type);
-                writer.println("// You can place your .schematic, .json, or .nbt files here");
-                writer.println("// Supported formats:");
-                writer.println("// - JSON format (like your original implementation)");
-                writer.println("// - WorldEdit .schematic files");
-                writer.println("// - Simple block lists");
-                writer.close();
+                // Create a simple example schematic with palette format
+                JsonObject schematic = new JsonObject();
                 
-                plugin.getLogger().info("Created example file: " + exampleFile.getPath());
+                // Add palette
+                JsonArray palette = new JsonArray();
+                palette.add("minecraft:air");           // index 0
+                palette.add("minecraft:stone");         // index 1
+                palette.add("minecraft:stone_bricks");  // index 2
+                palette.add("minecraft:oak_planks");    // index 3
+                palette.add("minecraft:oak_door[facing=north]"); // index 4
+                schematic.add("palette", palette);
+                
+                // Create a simple 16x16x8 room structure
+                JsonArray blocks = new JsonArray();
+                for (int x = 0; x < 16; x++) {
+                    JsonArray yArray = new JsonArray();
+                    for (int y = 0; y < 8; y++) {
+                        JsonArray zArray = new JsonArray();
+                        for (int z = 0; z < 16; z++) {
+                            int blockIndex = 0; // air by default
+                            
+                            // Floor
+                            if (y == 0) {
+                                blockIndex = 1; // stone
+                            }
+                            // Walls
+                            else if (x == 0 || x == 15 || z == 0 || z == 15) {
+                                blockIndex = 2; // stone bricks
+                            }
+                            // Doors
+                            else if ((x == 7 || x == 8) && z == 0 && (y == 1 || y == 2)) {
+                                blockIndex = 4; // door
+                            }
+                            
+                            zArray.add(blockIndex);
+                        }
+                        yArray.add(zArray);
+                    }
+                    blocks.add(yArray);
+                }
+                schematic.add("blocks", blocks);
+                
+                // Add metadata
+                schematic.addProperty("width", 16);
+                schematic.addProperty("height", 8);
+                schematic.addProperty("length", 16);
+                schematic.addProperty("originRotation", "northwest");
+                
+                // Write gzipped JSON
+                FileOutputStream fos = new FileOutputStream(exampleFile);
+                GZIPOutputStream gzos = new GZIPOutputStream(fos);
+                OutputStreamWriter writer = new OutputStreamWriter(gzos);
+                writer.write(schematic.toString());
+                writer.close();
+                gzos.close();
+                fos.close();
+                
+                plugin.getLogger().info("Created example gzipped schematic: " + exampleFile.getPath());
             } catch (IOException e) {
                 plugin.getLogger().warning("Could not create example file: " + e.getMessage());
             }
@@ -163,7 +212,7 @@ public class SchematicLoader {
         try {
             if (fileName.endsWith(".json")) {
                 return loadJsonSchematic(file, category);
-            } else if (fileName.endsWith(".gz")) {
+            } else if (fileName.endsWith(".gz") || fileName.endsWith(".json.gz")) {
                 return loadGzippedJsonSchematic(file, category);
             } else if (fileName.endsWith(".schematic")) {
                 return loadWorldEditSchematic(file, category);
@@ -206,7 +255,7 @@ public class SchematicLoader {
     }
     
     /**
-     * Parse JSON schematic data
+     * Parse JSON schematic data with palette format
      */
     private SchematicData parseJsonSchematic(JsonObject json, String fileName, String category) {
         // Parse metadata
@@ -215,8 +264,17 @@ public class SchematicLoader {
         
         List<SchematicBlock> blocks = new ArrayList<SchematicBlock>();
         
+        // Parse palette array
+        List<String> palette = new ArrayList<String>();
+        if (json.has("palette")) {
+            JsonArray paletteArray = json.getAsJsonArray("palette");
+            for (int i = 0; i < paletteArray.size(); i++) {
+                palette.add(paletteArray.get(i).getAsString());
+            }
+        }
+        
+        // Parse 3D block array
         if (json.has("blocks")) {
-            // Parse blocks array [x][y][z] format
             JsonArray xArray = json.getAsJsonArray("blocks");
             
             for (int x = 0; x < xArray.size(); x++) {
@@ -224,24 +282,115 @@ public class SchematicLoader {
                 for (int y = 0; y < yArray.size(); y++) {
                     JsonArray zArray = yArray.get(y).getAsJsonArray();
                     for (int z = 0; z < zArray.size(); z++) {
-                        int blockId = zArray.get(z).getAsInt();
-                        if (blockId != 0) { // Skip air blocks
-                            Material material = getMaterialFromId(blockId);
-                            blocks.add(new SchematicBlock(material, (byte) 0, x, y, z));
+                        int paletteIndex = zArray.get(z).getAsInt();
+                        
+                        // Skip air blocks (index 0 is typically air)
+                        if (paletteIndex > 0 && paletteIndex < palette.size()) {
+                            String blockState = palette.get(paletteIndex);
+                            Material material = parseBlockState(blockState);
+                            byte data = parseBlockData(blockState);
+                            
+                            blocks.add(new SchematicBlock(material, data, x, y, z));
                         }
                     }
                 }
             }
         }
         
-        // Calculate dimensions
+        // Calculate dimensions from the 3D array
         int width = 32, height = 32, length = 32; // Default room size
+        if (json.has("blocks")) {
+            JsonArray xArray = json.getAsJsonArray("blocks");
+            width = xArray.size();
+            if (width > 0) {
+                JsonArray yArray = xArray.get(0).getAsJsonArray();
+                height = yArray.size();
+                if (height > 0) {
+                    JsonArray zArray = yArray.get(0).getAsJsonArray();
+                    length = zArray.size();
+                }
+            }
+        }
+        
+        // Override with explicit dimensions if provided
         if (json.has("width")) width = json.get("width").getAsInt();
         if (json.has("height")) height = json.get("height").getAsInt();
         if (json.has("length")) length = json.get("length").getAsInt();
         
         SchematicMeta meta = new SchematicMeta(width, height, length, name, originRotation);
         return new SchematicData(meta, blocks, category);
+    }
+    
+    /**
+     * Parse block state string to Material
+     */
+    private Material parseBlockState(String blockState) {
+        // Handle different block state formats
+        if (blockState.contains("[")) {
+            // Remove properties like [facing=north]
+            blockState = blockState.substring(0, blockState.indexOf("["));
+        }
+        
+        // Remove namespace if present
+        if (blockState.contains(":")) {
+            blockState = blockState.substring(blockState.indexOf(":") + 1);
+        }
+        
+        // Convert to uppercase for Material enum
+        blockState = blockState.toUpperCase();
+        
+        try {
+            return Material.valueOf(blockState);
+        } catch (IllegalArgumentException e) {
+            // Fallback mappings for common blocks
+            switch (blockState) {
+                case "STONE_BRICKS": return Material.STONE;
+                case "COBBLESTONE": return Material.STONE;
+                case "PLANKS": return Material.WOOD;
+                case "LOG": return Material.LOG;
+                case "LEAVES": return Material.LEAVES;
+                case "GLASS": return Material.GLASS;
+                case "WOOL": return Material.WOOL;
+                case "CARPET": return Material.CARPET;
+                case "BED": return Material.BED;
+                case "SIGN": return Material.SIGN;
+                case "DOOR": return Material.DOOR;
+                case "FENCE": return Material.FENCE;
+                case "FENCE_GATE": return Material.FENCE_GATE;
+                case "STAIRS": return Material.STAIRS;
+                case "SLAB": return Material.STEP;
+                case "WALL": return Material.COBBLE_WALL;
+                default: return Material.STONE;
+            }
+        }
+    }
+    
+    /**
+     * Parse block data from block state string
+     */
+    private byte parseBlockData(String blockState) {
+        // Extract data value from block state properties
+        if (blockState.contains("[")) {
+            String properties = blockState.substring(blockState.indexOf("[") + 1, blockState.indexOf("]"));
+            String[] props = properties.split(",");
+            
+            for (String prop : props) {
+                if (prop.contains("=")) {
+                    String[] keyValue = prop.split("=");
+                    if (keyValue[0].trim().equals("facing")) {
+                        String facing = keyValue[1].trim();
+                        switch (facing) {
+                            case "north": return 2;
+                            case "south": return 3;
+                            case "west": return 4;
+                            case "east": return 5;
+                        }
+                    }
+                }
+            }
+        }
+        
+        return 0;
     }
     
     /**
@@ -264,14 +413,7 @@ public class SchematicLoader {
         return new SchematicData(meta, blocks, category);
     }
     
-    /**
-     * Convert block ID to Material (1.8.8 compatibility)
-     */
-    @SuppressWarnings("deprecation")
-    private Material getMaterialFromId(int id) {
-        Material material = Material.getMaterial(id);
-        return material != null ? material : Material.STONE;
-    }
+
     
     /**
      * Get a random schematic for the given category
