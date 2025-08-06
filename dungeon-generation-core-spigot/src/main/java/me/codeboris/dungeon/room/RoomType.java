@@ -1,4 +1,4 @@
-package me.carscupcake.dungeon.room;
+package me.codeboris.dungeon.room;
 
 /**
  * Different types of rooms in the dungeon

@@ -1,13 +1,13 @@
-package me.carscupcake.dungeon.schematic;
+package me.codeboris.dungeon.schematic;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import me.carscupcake.dungeon.DungeonGenerationCore;
-import me.carscupcake.dungeon.room.RoomShape;
-import me.carscupcake.dungeon.room.RoomType;
-import me.carscupcake.dungeon.schematic.SchematicFormat.SchematicBlock;
-import me.carscupcake.dungeon.schematic.SchematicFormat.SchematicMeta;
+import me.codeboris.dungeon.DungeonGenerationCore;
+import me.codeboris.dungeon.room.RoomShape;
+import me.codeboris.dungeon.room.RoomType;
+import me.codeboris.dungeon.schematic.SchematicFormat.SchematicBlock;
+import me.codeboris.dungeon.schematic.SchematicFormat.SchematicMeta;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 

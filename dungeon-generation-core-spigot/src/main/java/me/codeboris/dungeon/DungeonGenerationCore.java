@@ -1,8 +1,8 @@
-package me.carscupcake.dungeon;
+package me.codeboris.dungeon;
 
-import me.carscupcake.dungeon.commands.DungeonCommand;
-import me.carscupcake.dungeon.schematic.SchematicLoader;
-import me.carscupcake.dungeon.world.DungeonWorldBuilder;
+import me.codeboris.dungeon.commands.DungeonCommand;
+import me.codeboris.dungeon.schematic.SchematicLoader;
+import me.codeboris.dungeon.world.DungeonWorldBuilder;
 import org.bukkit.plugin.java.JavaPlugin;
 
 /**

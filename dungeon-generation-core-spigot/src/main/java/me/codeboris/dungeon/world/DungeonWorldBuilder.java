@@ -1,12 +1,12 @@
-package me.carscupcake.dungeon.world;
+package me.codeboris.dungeon.world;
 
-import me.carscupcake.dungeon.DungeonGenerationCore;
-import me.carscupcake.dungeon.generator.DungeonGenerator;
-import me.carscupcake.dungeon.room.*;
-import me.carscupcake.dungeon.schematic.SchematicLoader;
-import me.carscupcake.dungeon.schematic.SchematicLoader.SchematicData;
-import me.carscupcake.dungeon.schematic.SchematicFormat.SchematicBlock;
-import me.carscupcake.dungeon.util.Pos2d;
+import me.codeboris.dungeon.DungeonGenerationCore;
+import me.codeboris.dungeon.generator.DungeonGenerator;
+import me.codeboris.dungeon.room.*;
+import me.codeboris.dungeon.schematic.SchematicLoader;
+import me.codeboris.dungeon.schematic.SchematicLoader.SchematicData;
+import me.codeboris.dungeon.schematic.SchematicFormat.SchematicBlock;
+import me.codeboris.dungeon.util.Pos2d;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;

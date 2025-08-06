@@ -1,4 +1,4 @@
-package me.carscupcake.dungeon.schematic;
+package me.codeboris.dungeon.schematic;
 
 import org.bukkit.Material;
 import org.bukkit.block.Block;

@@ -1,7 +1,7 @@
-package me.carscupcake.dungeon.generator;
+package me.codeboris.dungeon.generator;
 
-import me.carscupcake.dungeon.room.*;
-import me.carscupcake.dungeon.util.Pos2d;
+import me.codeboris.dungeon.room.*;
+import me.codeboris.dungeon.util.Pos2d;
 import org.bukkit.Bukkit;
 
 import java.util.*;

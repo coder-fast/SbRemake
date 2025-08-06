@@ -1,4 +1,4 @@
-package me.carscupcake.dungeon.util;
+package me.codeboris.dungeon.util;
 
 import org.bukkit.Location;
 import org.bukkit.World;

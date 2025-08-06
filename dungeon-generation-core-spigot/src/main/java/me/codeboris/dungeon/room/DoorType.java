@@ -1,4 +1,4 @@
-package me.carscupcake.dungeon.room;
+package me.codeboris.dungeon.room;
 
 /**
  * Types of doors/connections between rooms
